@@ -1,11 +1,10 @@
 {
-  "name": "My Custom App",
-  "short_name": "MyApp",
-  "start_url": "./index.html",
+  "name": "Fantasy 5 Pro",
+  "short_name": "F5 Pro",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4A90E2",
-  "description": "My first home screen application.",
+  "background_color": "#0a0a0a",
+  "theme_color": "#00ffcc",
   "icons": [
     {
       "src": "icon-512.png",
