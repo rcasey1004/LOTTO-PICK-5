@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AZ Fantasy 5 AI PRO</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00ffcc">
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0a0a0a; color: white; padding: 20px; }
         .card { background: #161616; padding: 25px; border-radius: 20px; border: 2px solid #00ffcc; max-width: 450px; margin: auto; box-shadow: 0 0 30px rgba(0,255,204,0.15); }
@@ -11,89 +13,4 @@
         textarea { width: 90%; height: 80px; background: #222; color: #ffcc00; border: 1px solid #444; border-radius: 10px; padding: 10px; margin-top: 10px; font-family: monospace; }
         button { background: #00ffcc; color: #000; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; width: 100%; transition: 0.2s; }
         button:active { transform: scale(0.96); }
-        .results-container { margin-top: 25px; background: #1e1e1e; border-radius: 15px; padding: 10px; border: 1px solid #333; }
-        .prediction-row { padding: 15px; border-bottom: 1px solid #333; display: flex; flex-direction: column; align-items: center; }
-        .prediction-row:last-child { border-bottom: none; }
-        .label { color: #888; font-size: 10px; margin-bottom: 5px; text-transform: uppercase; }
-        .pick-values { color: #fff; font-size: 22px; font-weight: bold; letter-spacing: 4px; }
-        .stats { font-size: 10px; color: #00ffcc; margin-top: 4px; }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <h1>Fantasy 5 Pro</h1>
-        <p style="font-size: 12px; color: #888;">AI Engine: Sum Range + Odd/Even + Clump Filters</p>
-        <textarea id="history" placeholder="Paste draw history here..."></textarea>
-        
-        <button onclick="generateSmartPicks()">RUN PRO ANALYSIS</button>
-
-        <div id="resultsArea" class="results-container" style="display:none;">
-            <div class="prediction-row"><span class="label">AI Line 1 (Hot Weighted)</span> <span id="r0" class="pick-values"></span><span id="s0" class="stats"></span></div>
-            <div class="prediction-row"><span class="label">AI Line 2 (Hot Weighted)</span> <span id="r1" class="pick-values"></span><span id="s1" class="stats"></span></div>
-            <div class="prediction-row"><span class="label">AI Line 3 (Balanced)</span> <span id="r2" class="pick-values"></span><span id="s2" class="stats"></span></div>
-            <div class="prediction-row"><span class="label">AI Line 4 (Overdue)</span> <span id="r3" class="pick-values"></span><span id="s3" class="stats"></span></div>
-            <div class="prediction-row"><span class="label">AI Line 5 (Overdue)</span> <span id="r4" class="pick-values"></span><span id="s4" class="stats"></span></div>
-        </div>
-    </div>
-
-    <script>
-        window.onload = function() {
-            const savedHistory = localStorage.getItem('f5_data_pro');
-            if (savedHistory) { document.getElementById('history').value = savedHistory; }
-        };
-
-        function checkFilters(line) {
-            let nums = line.map(Number).sort((a,b) => a-b);
-            // 1. Sum Filter (75-125)
-            let sum = nums.reduce((a, b) => a + b, 0);
-            if (sum < 70 || sum > 130) return false;
-            // 2. Odd/Even (Must be 3:2 or 2:3)
-            let odds = nums.filter(n => n % 2 !== 0).length;
-            if (odds < 2 || odds > 3) return false;
-            // 3. Consecutive (No more than 2 in a row)
-            for (let i = 0; i < nums.length - 2; i++) {
-                if (nums[i+1] == nums[i]+1 && nums[i+2] == nums[i]+2) return false;
-            }
-            return {sum, odds, evens: 5-odds};
-        }
-
-        function generateSmartPicks() {
-            const historyText = document.getElementById('history').value;
-            localStorage.setItem('f5_data_pro', historyText);
-            const numbers = historyText.match(/\b([1-9]|[123][0-9]|4[01])\b/g);
-            
-            if (!numbers || numbers.length < 5) { alert("Need more history!"); return; }
-
-            let counts = {};
-            for (let i = 1; i <= 41; i++) counts[i] = 0;
-            numbers.forEach(n => { if(counts[parseInt(n)] !== undefined) counts[parseInt(n)]++; });
-            let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-
-            document.getElementById('resultsArea').style.display = 'block';
-
-            for (let i = 0; i < 5; i++) {
-                let validLine = false;
-                let attempts = 0;
-                let finalLine = [];
-                let stats = {};
-
-                while (!validLine && attempts < 500) {
-                    let line = [];
-                    let pool = (i < 2) ? sorted.slice(0, 18) : (i === 2) ? Array.from({length: 41}, (_, k) => (k+1).toString()) : sorted.slice(-18);
-                    while(line.length < 5) {
-                        let n = pool[Math.floor(Math.random() * pool.length)];
-                        if(!line.includes(n)) line.push(n);
-                    }
-                    stats = checkFilters(line);
-                    if (stats) { finalLine = line.sort((a,b) => a-b); validLine = true; }
-                    attempts++;
-                }
-                
-                document.getElementById('r' + i).innerText = finalLine.join(' ');
-                document.getElementById('s' + i).innerText = `Sum: ${stats.sum} | O/E: ${stats.odds}:${stats.evens}`;
-            }
-        }
-    </script>
-</body>
-</html>
+        .results-container { margin-top: 25px; background
