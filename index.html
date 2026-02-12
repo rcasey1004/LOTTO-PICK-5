@@ -67,4 +67,33 @@
 
             let counts = {};
             for (let i = 1; i <= 41; i++) counts[i] = 0;
-            numbers.forEach(n
+            numbers.forEach(n => { if(counts[parseInt(n)] !== undefined) counts[parseInt(n)]++; });
+            let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+            document.getElementById('resultsArea').style.display = 'block';
+
+            for (let i = 0; i < 5; i++) {
+                let validLine = false;
+                let attempts = 0;
+                let finalLine = [];
+                let stats = {};
+
+                while (!validLine && attempts < 500) {
+                    let line = [];
+                    let pool = (i < 2) ? sorted.slice(0, 18) : (i === 2) ? Array.from({length: 41}, (_, k) => (k+1).toString()) : sorted.slice(-18);
+                    while(line.length < 5) {
+                        let n = pool[Math.floor(Math.random() * pool.length)];
+                        if(!line.includes(n)) line.push(n);
+                    }
+                    stats = checkFilters(line);
+                    if (stats) { finalLine = line.sort((a,b) => a-b); validLine = true; }
+                    attempts++;
+                }
+                
+                document.getElementById('r' + i).innerText = finalLine.join(' ');
+                document.getElementById('s' + i).innerText = `Sum: ${stats.sum} | O/E: ${stats.odds}:${stats.evens}`;
+            }
+        }
+    </script>
+</body>
+</html>
