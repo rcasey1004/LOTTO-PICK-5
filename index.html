@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AZ Fantasy 5 AI</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0f0f; color: white; padding: 20px; }
+        .card { background: #1a1a1a; padding: 25px; border-radius: 20px; border: 2px solid #00c8ff; max-width: 450px; margin: auto; box-shadow: 0 0 20px rgba(0,200,255,0.2); }
+        h1 { color: #00c8ff; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        textarea { width: 90%; height: 80px; background: #222; color: #00ffcc; border: 1px solid #444; border-radius: 10px; padding: 10px; margin-top: 10px; font-family: monospace; }
+        button { background: #00c8ff; color: #000; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; width: 100%; transition: 0.2s; }
+        button:active { transform: scale(0.95); background: #0099cc; }
+        .results-container { margin-top: 25px; background: #222; border-radius: 15px; padding: 10px; }
+        .prediction-row { padding: 12px; border-bottom: 1px solid #333; display: flex; flex-direction: column; align-items: center; }
+        .prediction-row:last-child { border-bottom: none; }
+        .label { color: #888; font-size: 11px; margin-bottom: 5px; }
+        .pick-values { color: #00ffcc; font-size: 20px; font-weight: bold; letter-spacing: 3px; word-spacing: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>AZ Fantasy 5 AI</h1>
+        <p style="font-size: 13px; color: #aaa;">Input last 100+ draws (Numbers 1-41):</p>
+        <textarea id="history" placeholder="Example: 1, 12, 24, 31, 40..."></textarea>
+        
+        <button onclick="generateFantasy5()">ANALYZE & PREDICT 5 LINES</button>
+
+        <div id="resultsArea" class="results-container" style="display:none;">
+            <div class="prediction-row"><span class="label">LINE 1 (HOT WEIGHTED)</span> <span id="r0" class="pick-values"></span></div>
+            <div class="prediction-row"><span class="label">LINE 2 (HOT WEIGHTED)</span> <span id="r1" class="pick-values"></span></div>
+            <div class="prediction-row"><span class="label">LINE 3 (BALANCED MIX)</span> <span id="r2" class="pick-values"></span></div>
+            <div class="prediction-row"><span class="label">LINE 4 (OVERDUE FOCUS)</span> <span id="r3" class="pick-values"></span></div>
+            <div class="prediction-row"><span class="label">LINE 5 (OVERDUE FOCUS)</span> <span id="r4" class="pick-values"></span></div>
+        </div>
+    </div>
+
+    <script>
+        function generateFantasy5() {
+            const historyText = document.getElementById('history').value;
+            // Extract all numbers between 1 and 41
+            const numbers = historyText.match(/\b([1-9]|[123][0-9]|4[01])\b/g);
+            
+            if (!numbers || numbers.length < 5) {
+                alert("Please paste more history data (Numbers 1-41)!");
+                return;
+            }
+
+            let counts = {};
+            for (let i = 1; i <= 41; i++) counts[i] = 0;
+            numbers.forEach(n => { if(counts[parseInt(n)] !== undefined) counts[parseInt(n)]++; });
+
+            let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+            document.getElementById('resultsArea').style.display = 'block';
+
+            for (let i = 0; i < 5; i++) {
+                let line = [];
+                if (i < 2) { 
+                    // Hot lines: Pick from top 15 most frequent
+                    while(line.length < 5) {
+                        let n = sorted[Math.floor(Math.random() * 15)];
+                        if(!line.includes(n)) line.push(n);
+                    }
+                } else if (i === 2) {
+                    // Balanced: Mix of everything
+                    while(line.length < 5) {
+                        let n = Math.floor(Math.random() * 41) + 1;
+                        if(!line.includes(n.toString())) line.push(n.toString());
+                    }
+                } else {
+                    // Cold lines: Pick from bottom 15 least frequent
+                    while(line.length < 5) {
+                        let n = sorted[sorted.length - 1 - Math.floor(Math.random() * 15)];
+                        if(!line.includes(n)) line.push(n);
+                    }
+                }
+                
+                line.sort((a, b) => a - b);
+                document.getElementById('r' + i).innerText = line.join(' ');
+            }
+        }
+    </script>
+</body>
+</html>
